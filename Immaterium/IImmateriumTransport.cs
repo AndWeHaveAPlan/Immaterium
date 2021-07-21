@@ -5,37 +5,56 @@ namespace Immaterium
 {
     public interface IImmateriumTransport
     {
-        event EventHandler<ImmateriumMessage> OnMessage;
+        event EventHandler<ImmateriumTransportMessage> OnMessage;
 
         void Listen(string serviceName, bool exclusive = false);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="headers"></param>
+        /// <param name="body"></param>
         /// <returns></returns>
-        Task Send(ImmateriumMessage message);
+        Task Send(ImmateriumTransportMessage message);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="headers"></param>
+        /// <param name="body"></param>
         /// <returns></returns>
-        Task<ImmateriumMessage> Post(ImmateriumMessage message);
+        Task<ImmateriumTransportMessage> Post(ImmateriumTransportMessage message);
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="message"></param>
+        /// <param name="headers"></param>
+        /// <param name="body"></param>
         /// <returns></returns>
-        Task Publish(ImmateriumMessage message);
+        Task Publish(ImmateriumTransportMessage message);
 
-        /// <summary>
-        /// 
+        /// <summary> 
         /// </summary>
         /// <param name="targetServiceName"></param>
         /// <param name="action"></param>
         /// <param name="durable"></param>
-        void Subscribe(string targetServiceName, Subscriber<ImmateriumMessage> action, bool durable = true);
+        void Subscribe(string targetServiceName, Subscriber<ImmateriumTransportMessage> action, bool durable = true);
+    }
+
+    public class ImmateriumTransportMessage
+    {
+        public ImmateriumHeaderCollection Headers { get; set; }
+
+        public ImmateriumTransportMessage()
+        {
+            Headers = new ImmateriumHeaderCollection();
+        }
+
+        public ImmateriumTransportMessage(ImmateriumHeaderCollection header)
+        {
+            Headers = header;
+        }
+
+        public byte[] Body;
     }
 }

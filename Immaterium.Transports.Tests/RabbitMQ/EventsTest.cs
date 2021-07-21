@@ -22,7 +22,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
         }
 
         [TestMethod]
-        [Timeout(500000)]
+        [Timeout(10000)]
         public void BasicPublish()
         {
             var tcs = new TaskCompletionSource<bool>();

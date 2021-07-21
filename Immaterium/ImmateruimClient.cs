@@ -3,6 +3,13 @@ using System.Threading.Tasks;
 
 namespace Immaterium
 {
+    public class MessageReceivedEventArgs
+    {
+        public ImmateriumMessage Message { get; internal set; }
+        //public object BodyObject { get; internal set; }
+        //public byte[] Body => Message.Body;
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -12,7 +19,7 @@ namespace Immaterium
         private readonly IImmateriumSerializer _serializer;
         private readonly IImmateriumTransport _transport;
 
-        public event EventHandler<ImmateriumMessage> OnMessage;
+        public event EventHandler<MessageReceivedEventArgs> OnMessage;
 
         public ImmateruimClient(string serviceName, IImmateriumSerializer serializer, IImmateriumTransport transport)
         {
@@ -20,14 +27,22 @@ namespace Immaterium
             _serializer = serializer;
             _transport = transport;
 
-            _transport.OnMessage += (sender, message) =>
+            _transport.OnMessage += (sender, transportMessage) =>
             {
-                switch (message.Type)
+                switch (transportMessage.Headers.Type)
                 {
                     case ImmateriumMessageType.Common:
                     case ImmateriumMessageType.Response:
                     case ImmateriumMessageType.Request:
-                        OnMessage?.Invoke(this, message);
+                        OnMessage?.Invoke(
+                            this,
+                            new MessageReceivedEventArgs
+                            {
+                                Message = new ImmateriumMessage(transportMessage.Headers)
+                                {
+                                    Body = _serializer.Deserialize<object>(transportMessage.Body)
+                                }
+                            });
                         break;
                     case ImmateriumMessageType.Event:
                         break;
@@ -52,7 +67,7 @@ namespace Immaterium
         /// <param name="messageToSend"></param>
         public void SendRaw(ImmateriumMessage messageToSend)
         {
-            _transport.Send(messageToSend);
+            _transport.Send(ToTransportMessage(messageToSend));
         }
 
         /// <summary>
@@ -63,16 +78,27 @@ namespace Immaterium
         /// <returns></returns>
         public ImmateriumMessage CreateReply(ImmateriumMessage request, object data = null)
         {
-            var response = data != null
-                ? _serializer.CreateMessage(data)
-                : new ImmateriumMessage();
+            var response = request.CreateReply();
+            if (data != null)
+                response.Body = data;
 
-            response.CorrelationId = request.CorrelationId;
-            response.Receiver = request.ReplyTo;
+            //response.CorrelationId = request.CorrelationId;
+            //response.Receiver = request.ReplyTo;
             //response.Sender = _serviceName;
-            response.Type = ImmateriumMessageType.Response;
+            //response.Type = ImmateriumMessageType.Response;
 
             return response;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="requestArgs"></param>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public ImmateriumMessage CreateReply(MessageReceivedEventArgs requestArgs, object data = null)
+        {
+            return CreateReply(requestArgs.Message, data);
         }
 
         /// <summary>
@@ -83,17 +109,17 @@ namespace Immaterium
         /// <param name="headers"></param>
         public void Send(string to, object objectToSend, params (string name, string value)[] headers)
         {
-            var immateriumMessage = _serializer.CreateMessage(objectToSend);
-            immateriumMessage.Receiver = to;
-            immateriumMessage.Sender = _serviceName;
-            immateriumMessage.Type = ImmateriumMessageType.Common;
+            var immateriumTransportMessage = _serializer.CreateMessage(objectToSend);
+            immateriumTransportMessage.Headers.Receiver = to;
+            immateriumTransportMessage.Headers.Sender = _serviceName;
+            immateriumTransportMessage.Headers.Type = ImmateriumMessageType.Common;
 
             foreach (var (name, value) in headers)
             {
-                immateriumMessage.Headers.TryAdd(name, value);
+                immateriumTransportMessage.Headers.TryAdd(name, value);
             }
 
-            _transport.Send(immateriumMessage);
+            _transport.Send(immateriumTransportMessage);
         }
 
         /// <summary>
@@ -102,10 +128,13 @@ namespace Immaterium
         /// <returns></returns>
         public async Task<T> Post<T>(string to, object objectToSend, params (string name, string value)[] headers) where T : class
         {
-            var immateriumMessage = _serializer.CreateMessage(objectToSend);
-            immateriumMessage.Receiver = to;
-            immateriumMessage.Sender = _serviceName;
-            immateriumMessage.Type = ImmateriumMessageType.Request;
+            var immateriumMessage = new ImmateriumMessage();// _serializer.CreateMessage(objectToSend);
+
+            immateriumMessage.Body = objectToSend;
+
+            immateriumMessage.Headers.Receiver = to;
+            immateriumMessage.Headers.Sender = _serviceName;
+            immateriumMessage.Headers.Type = ImmateriumMessageType.Request;
 
             foreach (var (name, value) in headers)
             {
@@ -113,7 +142,7 @@ namespace Immaterium
             }
 
             var response = await PostRaw(immateriumMessage);
-            var result = _serializer.Deserialize<T>(response.Body);
+            var result = response.Body as T;
 
             return result;
         }
@@ -123,11 +152,11 @@ namespace Immaterium
         /// </summary>
         /// <param name="messageToSend"></param>
         /// <returns></returns>
-        public Task<ImmateriumMessage> PostRaw(ImmateriumMessage messageToSend)
+        public async Task<ImmateriumMessage> PostRaw(ImmateriumMessage messageToSend)
         {
-            var t = _transport.Post(messageToSend);
+            var t = await _transport.Post(ToTransportMessage(messageToSend));
 
-            return t;
+            return FromTransportMessage(t);
         }
 
         /// <summary>
@@ -137,15 +166,18 @@ namespace Immaterium
         /// <param name="headers"></param>
         public async void Publish(object body, params (string name, string value)[] headers)
         {
-            var eventMessage = _serializer.CreateMessage(body);
-            eventMessage.Type = ImmateriumMessageType.Event;
+            var eventMessage = new ImmateriumMessage();// _serializer.CreateMessage(body);
+
+            eventMessage.Body = body;
+
+            eventMessage.Headers.Type = ImmateriumMessageType.Event;
 
             foreach (var (name, value) in headers)
             {
                 eventMessage.Headers.TryAdd(name, value);
             }
 
-            await _transport.Publish(eventMessage);
+            await _transport.Publish(ToTransportMessage(eventMessage));
         }
 
         /// <summary>
@@ -158,12 +190,29 @@ namespace Immaterium
         {
             _transport.Subscribe(
                 targetServiceName,
-                new Subscriber<ImmateriumMessage>(message =>
+                new Subscriber<ImmateriumTransportMessage>(message =>
                 {
+                    // TODO: try/catch
                     T obj = _serializer.Deserialize<T>(message.Body);
                     subscriber.Invoke(obj);
                 })
                 , durable);
+        }
+
+        private ImmateriumTransportMessage ToTransportMessage(ImmateriumMessage originalMessage)
+        {
+            return new ImmateriumTransportMessage(originalMessage.Headers)
+            {
+                Body = _serializer.Serialize(originalMessage.Body)
+            };
+        }
+
+        private ImmateriumMessage FromTransportMessage(ImmateriumTransportMessage transportMessage)
+        {
+            return new ImmateriumMessage(transportMessage.Headers)
+            {
+                Body = _serializer.Deserialize<object>(transportMessage.Body)
+            };
         }
     }
 }

@@ -53,23 +53,45 @@
         /// <summary>
         /// 
         /// </summary>
-        public readonly ImmateriumHeaderCollection Headers = new ImmateriumHeaderCollection();
+        public ImmateriumHeaderCollection Headers { get; } = new ImmateriumHeaderCollection();
 
         /// <summary>
         /// Message payload
         /// </summary>
-        public byte[] Body;
+        public virtual object Body { get; set; }
+
+        public ImmateriumMessage()
+        {
+            Body = null;
+            Sender = "";
+            Receiver = "";
+            Type = ImmateriumMessageType.Common;
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        public ImmateriumMessage()
+        public ImmateriumMessage(ImmateriumHeaderCollection headers)
         {
-            Body = new byte[0];
+            Body = null;
+            Headers = headers;
+        }
 
-            Sender = "";
-            Receiver = "";
-            Type = ImmateriumMessageType.Common;
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public ImmateriumMessage CreateReply()
+        {
+            var response = new ImmateriumMessage
+            {
+                CorrelationId = CorrelationId,
+                Receiver = ReplyTo,
+                Sender = Receiver,
+                Type = ImmateriumMessageType.Response
+            };
+
+            return response;
         }
     }
 }

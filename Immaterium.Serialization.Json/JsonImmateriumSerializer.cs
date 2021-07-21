@@ -17,11 +17,11 @@ namespace Immaterium.Serialization.Json
             return JsonConvert.DeserializeObject<T>(jsonString);
         }
 
-        public ImmateriumMessage CreateMessage(object obj)
+        public ImmateriumTransportMessage CreateMessage(object obj)
         {
             var bytes = Serialize(obj);
 
-            var result = new ImmateriumMessage
+            var result = new ImmateriumTransportMessage
             {
                 Body = bytes
             };

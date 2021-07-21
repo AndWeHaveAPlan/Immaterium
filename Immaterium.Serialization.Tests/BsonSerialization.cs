@@ -35,7 +35,7 @@ namespace Immaterium.Serialization.Tests
             var serializer = new BsonImmateriumSerializer();
 
             var bytes = serializer.Serialize("pickle-pee");
-            var result = serializer.Deserialize<string>(bytes);
+            var result = serializer.Deserialize<object>(bytes);
 
             Assert.AreEqual("pickle-pee", result);
         }
@@ -84,6 +84,28 @@ namespace Immaterium.Serialization.Tests
 
             var bytes = serializer.Serialize(array);
             var result = serializer.Deserialize<object[]>(bytes);
+
+            Assert.AreEqual(((SimpleClass)array[0]).StrProp, ((SimpleClass)result[0]).StrProp);
+        }
+
+        [TestMethod]
+        public void StrangeTest()
+        {
+            var serializer = new BsonImmateriumSerializer();
+
+            var so = new SimpleClass();
+            so.StrProp = "pickle-pee";
+
+            var array = new object[3];
+
+            array[0] = so;
+            array[1] = 1;
+            array[2] = "asdf";
+
+            var bytes = serializer.Serialize(array);
+            var obj = serializer.Deserialize<object>(bytes);
+
+            var result = obj as object[];
 
             Assert.AreEqual(((SimpleClass)array[0]).StrProp, ((SimpleClass)result[0]).StrProp);
         }

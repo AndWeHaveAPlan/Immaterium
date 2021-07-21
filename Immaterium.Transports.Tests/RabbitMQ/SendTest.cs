@@ -35,7 +35,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
             server.OnMessage += (sender, message) =>
             {
-                var obj = serializer.Deserialize<string>(message.Body);
+                var obj = (string)message.Message.Body as string;
                 Assert.AreEqual("pickle-pee", obj);
                 tcs.SetResult(true);
             };
@@ -46,7 +46,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
         }
 
         [TestMethod]
-        [Timeout(5000)]
+        [Timeout(500000)]
         public void Post()
         {
             var serializer = new BsonImmateriumSerializer();
@@ -58,7 +58,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
             server.OnMessage += (sender, message) =>
             {
-                var obj = serializer.Deserialize<string>(message.Body);
+                var obj = message.Message.Body as string;
                 Assert.AreEqual("pickle-pee", obj);
                 var reply = server.CreateReply(message, "pump-u-rum");
 
@@ -95,7 +95,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             server1.Listen(false);
             server1.OnMessage += (sender, message) =>
             {
-                var obj = serializer.Deserialize<string>(message.Body);
+                var obj = message.Message.Body as string;
                 Assert.AreEqual("pickle-pee", obj);
                 lock (lockObj)
                 {
@@ -108,7 +108,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             server2.Listen(false);
             server2.OnMessage += (sender, message) =>
             {
-                var obj = serializer.Deserialize<string>(message.Body);
+                var obj = message.Message.Body as string;
                 Assert.AreEqual("pickle-pee", obj);
                 lock (lockObj)
                 {
@@ -142,7 +142,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
             server.OnMessage += (sender, message) =>
             {
-                var obj = serializer.Deserialize<string>(message.Body);
+                var obj = message.Message.Body as string;
                 if (obj == "pickle-pee")
                 {
                     var reply = server.CreateReply(message, "pump-u-rum");

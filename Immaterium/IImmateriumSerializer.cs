@@ -6,6 +6,6 @@
 
         public T Deserialize<T>(byte[] bytes);
 
-        public ImmateriumMessage CreateMessage(object obj);
+        public ImmateriumTransportMessage CreateMessage(object obj);
     }
 }
