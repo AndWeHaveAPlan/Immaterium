@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace Immaterium
 {
-    public interface IImmateriumTransport
+    public interface IImmateriumTransport : IDisposable
     {
         event EventHandler<ImmateriumTransportMessage> OnMessage;
 

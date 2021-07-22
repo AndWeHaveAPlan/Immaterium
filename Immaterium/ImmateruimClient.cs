@@ -13,7 +13,7 @@ namespace Immaterium
     /// <summary>
     /// 
     /// </summary>
-    public class ImmateruimClient
+    public class ImmateruimClient : IDisposable
     {
         private readonly string _serviceName;
         private readonly IImmateriumSerializer _serializer;
@@ -213,6 +213,11 @@ namespace Immaterium
             {
                 Body = _serializer.Deserialize<object>(transportMessage.Body)
             };
+        }
+
+        public void Dispose()
+        {
+            _transport?.Dispose();
         }
     }
 }

@@ -321,5 +321,10 @@ namespace Immaterium.Transports.RabbitMQ
             message.Body = _compressor.Compress(message.Body);
             message.Headers["Compression"] = "gzip";
         }
+
+        public void Dispose()
+        {
+            _model?.Dispose();
+        }
     }
 }
