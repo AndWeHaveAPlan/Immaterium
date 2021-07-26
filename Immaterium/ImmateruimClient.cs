@@ -199,6 +199,25 @@ namespace Immaterium
                 , durable);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="targetServiceName"></param>
+        /// <param name="subscriber"></param>
+        /// <param name="durable"></param>
+        public void SubscribeRaw(string targetServiceName, Subscriber<ImmateriumMessage> subscriber, bool durable = true)
+        {
+            _transport.Subscribe(
+                targetServiceName,
+                new Subscriber<ImmateriumTransportMessage>(message =>
+                {
+                    var immateriumMessage = FromTransportMessage(message);
+                    subscriber.Invoke(immateriumMessage);
+                })
+                , durable);
+        }
+
         private ImmateriumTransportMessage ToTransportMessage(ImmateriumMessage originalMessage)
         {
             return new ImmateriumTransportMessage(originalMessage.Headers)
