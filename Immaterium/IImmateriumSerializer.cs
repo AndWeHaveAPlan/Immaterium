@@ -4,8 +4,8 @@
     {
         byte[] Serialize(object obj);
 
-        public T Deserialize<T>(byte[] bytes);
+        T Deserialize<T>(byte[] bytes);
 
-        public ImmateriumTransportMessage CreateMessage(object obj);
+        ImmateriumTransportMessage CreateMessage(object obj);
     }
 }
