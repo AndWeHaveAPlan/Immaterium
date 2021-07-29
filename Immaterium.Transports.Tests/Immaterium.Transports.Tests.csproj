@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Immaterium.BsonSerializer\Immaterium.Serialization.Bson.csproj" />
     <ProjectReference Include="..\Immaterium.Transports.RabbitMQ\Immaterium.Transports.RabbitMQ.csproj" />
   </ItemGroup>
 

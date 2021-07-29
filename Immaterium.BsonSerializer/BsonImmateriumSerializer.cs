@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Serializers;
 
 namespace Immaterium.Serialization.Bson
 {
@@ -9,7 +10,7 @@ namespace Immaterium.Serialization.Bson
         public byte[] Serialize(object obj)
         {
             var w = new Wrapper<object>(obj);
-            var bytes = w.ToBson();
+            var bytes = w.ToBsonDocument().ToBson();
             return bytes;
         }
 
@@ -19,11 +20,11 @@ namespace Immaterium.Serialization.Bson
             return result.Value;
         }
 
-        public ImmateriumTransportMessage CreateMessage(object obj)
+        public ImmateriumMessage CreateMessage(object obj)
         {
             var bytes = Serialize(obj);
 
-            var result = new ImmateriumTransportMessage
+            var result = new ImmateriumMessage
             {
                 Body = bytes
             };

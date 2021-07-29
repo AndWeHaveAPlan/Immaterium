@@ -1,5 +1,5 @@
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Immaterium.Serialization.Bson;
 using Immaterium.Transports.RabbitMQ;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RabbitMQ.Client;
@@ -9,6 +9,8 @@ namespace Immaterium.Transports.Tests.RabbitMQ
     [TestClass]
     public class EventsTest
     {
+        public static byte[] TestArray = { 6, 5, 4, 3, 2 };
+
         private static RabbitMqTransport CreateTransport()
         {
             var factory = new ConnectionFactory();
@@ -18,7 +20,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
         private static ImmateruimClient CreateClient(string serviceName)
         {
-            return new ImmateruimClient(serviceName, new BsonImmateriumSerializer(), CreateTransport());
+            return new ImmateruimClient(serviceName, CreateTransport());
         }
 
         [TestMethod]
@@ -30,17 +32,17 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             var server = CreateClient("crow");
             var client = CreateClient("client");
 
-            var sub = new Subscriber<string>(str =>
+            var sub = new Subscriber(msg =>
               {
-                  Assert.AreEqual(str, "ololo");
+                  Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, msg.Body));
                   tcs.SetResult(true);
               });
-
+            //Assert.
             server.Listen();
 
             client.Subscribe("crow", sub);
 
-            server.Publish("ololo");
+            server.Publish(ArrayHelper.TestArray1);
 
             //client.Send("crow", "pickle-pee");
 

@@ -8,10 +8,6 @@ namespace Immaterium
 
         public event EventHandler<T> OnMessage;
 
-        public Subscriber()
-        {
-        }
-
         public Subscriber(Action<T> action)
         {
             _action = action;
@@ -21,6 +17,13 @@ namespace Immaterium
         {
             _action?.Invoke(result);
             OnMessage?.Invoke(this, result);
+        }
+    }
+
+    public class Subscriber : Subscriber<ImmateriumMessage>
+    {
+        public Subscriber(Action<ImmateriumMessage> action) : base(action)
+        {
         }
     }
 }

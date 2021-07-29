@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Immaterium.BsonSerializer\Immaterium.Serialization.Bson.csproj" />
+    <ProjectReference Include="..\Immaterium.Serialization.Binaron\Immaterium.Serialization.Binaron.csproj" />
     <ProjectReference Include="..\Immaterium.Serialization.Json\Immaterium.Serialization.Json.csproj" />
   </ItemGroup>
 

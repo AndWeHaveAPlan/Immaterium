@@ -19,10 +19,10 @@ namespace Immaterium.Transports.RabbitMQ
         private string _replyQueueName;
         private string _eventsExchangeName;
 
-        public event EventHandler<ImmateriumTransportMessage> OnMessage;
+        public event EventHandler<ImmateriumMessage> OnMessage;
 
-        private readonly ConcurrentDictionary<string, TaskCompletionSource<ImmateriumTransportMessage>> _replyTcs =
-            new ConcurrentDictionary<string, TaskCompletionSource<ImmateriumTransportMessage>>();
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<ImmateriumMessage>> _replyTcs =
+            new ConcurrentDictionary<string, TaskCompletionSource<ImmateriumMessage>>();
 
         public bool UseCompression = false;
         private GzipCompressor _compressor = new GzipCompressor();
@@ -46,7 +46,7 @@ namespace Immaterium.Transports.RabbitMQ
             var basicProperties = message.BasicProperties;
             var rawBody = message.Body.Span.ToArray();
 
-            var immateriumMessage = new ImmateriumTransportMessage()
+            var immateriumMessage = new ImmateriumMessage()
             {
                 Body = rawBody
             };
@@ -107,7 +107,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// 
         /// </summary>
         /// <param name="messageToSend"></param>
-        public Task Send(ImmateriumTransportMessage messageToSend)
+        public Task Send(ImmateriumMessage messageToSend)
         {
             var bp = _model.CreateBasicProperties();
             bp.Headers = new Dictionary<string, object>();
@@ -144,7 +144,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// </summary>
         /// <param name="messageToSend"></param>
         /// <returns></returns>
-        public Task<ImmateriumTransportMessage> Post(ImmateriumTransportMessage messageToSend)
+        public Task<ImmateriumMessage> Post(ImmateriumMessage messageToSend)
         {
             // TODO: message.body null or empty
 
@@ -157,7 +157,7 @@ namespace Immaterium.Transports.RabbitMQ
             messageToSend.Headers.CorrelationId = CreateCorrelationId();
             messageToSend.Headers.Type = ImmateriumMessageType.Request;
 
-            var tcs = new TaskCompletionSource<ImmateriumTransportMessage>();
+            var tcs = new TaskCompletionSource<ImmateriumMessage>();
 
             Send(messageToSend);
 
@@ -172,7 +172,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// <param name="targetServiceName"></param>
         /// <param name="subscriber"></param>
         /// <param name="durable"></param>
-        public void Subscribe(string targetServiceName, Subscriber<ImmateriumTransportMessage> subscriber, bool durable = true)
+        public void Subscribe(string targetServiceName, Subscriber<ImmateriumMessage> subscriber, bool durable = true)
         {
             var queueName = $"{_serviceName}-{targetServiceName}";
             var targetExchangeName = $"{targetServiceName}-events";
@@ -186,7 +186,7 @@ namespace Immaterium.Transports.RabbitMQ
             consumer.Received += (sender, message) =>
             {
                 var basicProperties = message.BasicProperties;
-                var immateriumMessage = new ImmateriumTransportMessage
+                var immateriumMessage = new ImmateriumMessage
                 {
                     Body = message.Body.Span.ToArray()
                 };
@@ -203,7 +203,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// </summary>
         /// <param name="immateriumMessage"></param>
         /// <returns></returns>
-        public Task Publish(ImmateriumTransportMessage immateriumMessage)
+        public Task Publish(ImmateriumMessage immateriumMessage)
         {
             EnsureEventExchange();
 
@@ -265,7 +265,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// </summary>
         /// <param name="basicProperties"></param>
         /// <param name="immateriumMessage"></param>
-        private void SetHeaders(IBasicProperties basicProperties, ImmateriumTransportMessage immateriumMessage)
+        private void SetHeaders(IBasicProperties basicProperties, ImmateriumMessage immateriumMessage)
         {
             //basicProperties.hea
             foreach (var (key, value) in immateriumMessage.Headers)
@@ -279,7 +279,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// </summary>
         /// <param name="basicProperties"></param>
         /// <param name="immateriumMessage"></param>
-        private void GetHeaders(IBasicProperties basicProperties, ImmateriumTransportMessage immateriumMessage)
+        private void GetHeaders(IBasicProperties basicProperties, ImmateriumMessage immateriumMessage)
         {
             foreach (var (key, value) in basicProperties.Headers)
             {
@@ -297,7 +297,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        private void Decompress(ImmateriumTransportMessage message)
+        private void Decompress(ImmateriumMessage message)
         {
             if (message.Headers["Compression"] == "gzip")
             {
@@ -310,7 +310,7 @@ namespace Immaterium.Transports.RabbitMQ
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        private void Compress(ImmateriumTransportMessage message)
+        private void Compress(ImmateriumMessage message)
         {
             if (UseCompression == false)
                 return;

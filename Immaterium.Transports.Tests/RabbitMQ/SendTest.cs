@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using Immaterium.Serialization.Bson;
 using Immaterium.Transports.RabbitMQ;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RabbitMQ.Client;
@@ -18,7 +17,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
         private static ImmateruimClient CreateClient(string serviceName)
         {
-            return new ImmateruimClient(serviceName, new BsonImmateriumSerializer(), CreateTransport());
+            return new ImmateruimClient(serviceName, CreateTransport());
         }
 
         [TestMethod]
@@ -27,20 +26,18 @@ namespace Immaterium.Transports.Tests.RabbitMQ
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            var serializer = new BsonImmateriumSerializer();
 
             var server = CreateClient("crow0");
             var client = CreateClient("client0");
             server.Listen(false);
 
-            server.OnMessage += (sender, message) =>
+            server.OnMessage += (sender, e) =>
             {
-                var obj = (string)message.Message.Body as string;
-                Assert.AreEqual("pickle-pee", obj);
+                Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, e.Message.Body));
                 tcs.SetResult(true);
             };
 
-            client.Send("crow0", "pickle-pee");
+            client.Send("crow0", ArrayHelper.TestArray1);
 
             tcs.Task.Wait();
         }
@@ -49,27 +46,26 @@ namespace Immaterium.Transports.Tests.RabbitMQ
         [Timeout(500000)]
         public void Post()
         {
-            var serializer = new BsonImmateriumSerializer();
-
             var server = CreateClient("crow1");
             var client = CreateClient("client1");
 
             server.Listen(false);
 
-            server.OnMessage += (sender, message) =>
+            server.OnMessage += (sender, e) =>
             {
-                var obj = message.Message.Body as string;
-                Assert.AreEqual("pickle-pee", obj);
-                var reply = server.CreateReply(message, "pump-u-rum");
+                Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, e.Message.Body));
+                var reply = server.CreateReply(e.Message, ArrayHelper.TestArray2);
 
                 server.SendRaw(reply);
             };
 
-            var response = client.Post<string>("crow1", "pickle-pee").Result;
+            var response = client.Post("crow1", ArrayHelper.TestArray1).Result;
 
-            Assert.IsFalse(string.IsNullOrWhiteSpace(response));
-            Assert.AreEqual("pump-u-rum", response);
+            Assert.IsFalse(response == null);
+            Assert.IsTrue(ArrayHelper.ByteArrayEqual(response, ArrayHelper.TestArray2));
         }
+
+
 
         [TestMethod]
         [Timeout(5000)]
@@ -77,11 +73,6 @@ namespace Immaterium.Transports.Tests.RabbitMQ
         {
             var tcs = new TaskCompletionSource<bool>();
 
-            //var factory = new ConnectionFactory() { };
-            //var factory = new ConnectionFactory() { HostName = "10.133.12.28", UserName = "c2m-bus", Password = "qwerty", VirtualHost = "c2m-bus" };
-            //using var connection = factory.CreateConnection();
-
-            var serializer = new BsonImmateriumSerializer();
 
             var server1 = CreateClient("crow2");
             var server2 = CreateClient("crow2");
@@ -93,10 +84,9 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             object lockObj = new object();
 
             server1.Listen(false);
-            server1.OnMessage += (sender, message) =>
+            server1.OnMessage += (sender, e) =>
             {
-                var obj = message.Message.Body as string;
-                Assert.AreEqual("pickle-pee", obj);
+                Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, e.Message.Body));
                 lock (lockObj)
                 {
                     c++;
@@ -106,10 +96,9 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             };
 
             server2.Listen(false);
-            server2.OnMessage += (sender, message) =>
+            server2.OnMessage += (sender, e) =>
             {
-                var obj = message.Message.Body as string;
-                Assert.AreEqual("pickle-pee", obj);
+                Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, e.Message.Body));
                 lock (lockObj)
                 {
                     c++;
@@ -120,18 +109,18 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
             for (int i = 0; i < 10; i++)
             {
-                client.Send("crow2", "pickle-pee");
+                client.Send("crow2", ArrayHelper.TestArray1);
             }
 
             tcs.Task.Wait();
             Assert.AreEqual(10, c);
         }
 
+        /*
         [TestMethod]
         [Timeout(5000)]
         public void MultiPost()
         {
-            var serializer = new BsonImmateriumSerializer();
 
             var server = CreateClient("crow3");
 
@@ -168,6 +157,6 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             }
 
             Assert.AreEqual(10, i);
-        }
+        }*/
     }
 }

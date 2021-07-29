@@ -58,7 +58,7 @@
         /// <summary>
         /// Message payload
         /// </summary>
-        public virtual object Body { get; set; }
+        public virtual byte[] Body { get; set; }
 
         public ImmateriumMessage()
         {
