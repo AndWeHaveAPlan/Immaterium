@@ -13,6 +13,7 @@ namespace Immaterium.Transports.RabbitMQ
     /// </summary>
     public class RabbitMqTransport : IImmateriumTransport
     {
+        private readonly IConnection _rabbitMqConnection;
         private string _serviceName;
         private readonly IModel _model;
 
@@ -25,7 +26,41 @@ namespace Immaterium.Transports.RabbitMQ
             new ConcurrentDictionary<string, TaskCompletionSource<ImmateriumMessage>>();
 
         public bool UseCompression = false;
-        private GzipCompressor _compressor = new GzipCompressor();
+        private readonly GzipCompressor _compressor = new GzipCompressor();
+
+        #region Constructors
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public RabbitMqTransport()
+        {
+            var factory = new ConnectionFactory();
+            _rabbitMqConnection = factory.CreateConnection();
+            _model = _rabbitMqConnection.CreateModel();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connectionString"></param>
+        public RabbitMqTransport(string connectionString)
+        {
+            var factory = new ConnectionFactory() { Uri = new Uri(connectionString) };
+            _rabbitMqConnection = factory.CreateConnection();
+            _model = _rabbitMqConnection.CreateModel();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="connectionUri"></param>
+        public RabbitMqTransport(Uri connectionUri)
+        {
+            var factory = new ConnectionFactory() { Uri = connectionUri };
+            _rabbitMqConnection = factory.CreateConnection();
+            _model = _rabbitMqConnection.CreateModel();
+        }
 
         /// <summary>
         /// 
@@ -35,6 +70,8 @@ namespace Immaterium.Transports.RabbitMQ
         {
             _model = rabbitMqConnection.CreateModel();
         }
+
+        #endregion
 
         /// <summary>
         /// 
@@ -324,6 +361,7 @@ namespace Immaterium.Transports.RabbitMQ
 
         public void Dispose()
         {
+            _rabbitMqConnection?.Dispose();
             _model?.Dispose();
         }
     }

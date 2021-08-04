@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Immaterium.Transports.RabbitMQ;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -10,7 +11,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
     {
         private static RabbitMqTransport CreateTransport()
         {
-            var factory = new ConnectionFactory();
+            var factory = new ConnectionFactory() { };
             var connection = factory.CreateConnection();
             return new RabbitMqTransport(connection) { UseCompression = true };
         }
