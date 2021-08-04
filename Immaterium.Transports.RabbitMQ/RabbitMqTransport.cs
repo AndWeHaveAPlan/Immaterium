@@ -196,9 +196,9 @@ namespace Immaterium.Transports.RabbitMQ
 
             var tcs = new TaskCompletionSource<ImmateriumMessage>();
 
-            Send(messageToSend);
-
             _replyTcs.TryAdd(messageToSend.Headers.CorrelationId, tcs);
+
+            Send(messageToSend);
 
             return tcs.Task;
         }
