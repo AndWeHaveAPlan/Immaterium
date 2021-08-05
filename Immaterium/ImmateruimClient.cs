@@ -56,6 +56,11 @@ namespace Immaterium
             _transport.Listen(_serviceName, exclusive);
         }
 
+        public void StopListen()
+        {
+
+        }
+
         /// <summary>
         /// 
         /// </summary>

@@ -9,6 +9,8 @@ namespace Immaterium
 
         void Listen(string serviceName, bool exclusive = false);
 
+        void Stop();
+
         /// <summary>
         /// 
         /// </summary>

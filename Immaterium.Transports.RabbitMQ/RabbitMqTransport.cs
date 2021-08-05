@@ -115,6 +115,7 @@ namespace Immaterium.Transports.RabbitMQ
         {
             _serviceName = serviceName;
 
+            //declare as permanent
             _model.ExchangeDeclare(_serviceName, "fanout", durable: true, autoDelete: false);
 
             if (!exclusive)
@@ -131,7 +132,15 @@ namespace Immaterium.Transports.RabbitMQ
             }
         }
 
-        private void ListenReply()
+        public void Stop()
+        {
+            _rabbitMqConnection.Close(TimeSpan.FromSeconds(10));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void ListenReply()
         {
             var replyQueue = _model.QueueDeclare();
             _replyQueueName = replyQueue.QueueName;
