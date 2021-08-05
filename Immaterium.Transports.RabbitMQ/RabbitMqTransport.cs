@@ -213,9 +213,9 @@ namespace Immaterium.Transports.RabbitMQ
         {
             var queueName = $"{_serviceName}-{targetServiceName}";
             var targetExchangeName = $"{targetServiceName}-events";
-            _model.ExchangeDeclare(targetExchangeName, "fanout", durable: durable, autoDelete: !durable);
+            _model.ExchangeDeclare(targetExchangeName, "fanout", durable: true, autoDelete: false);
 
-            _model.QueueDeclare(queueName, true, false, false);
+            _model.QueueDeclare(queueName, durable, false, !durable);
 
             _model.QueueBind(queueName, targetExchangeName, "");
 

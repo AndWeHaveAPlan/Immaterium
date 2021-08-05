@@ -161,11 +161,9 @@ namespace Immaterium
         /// </summary>
         /// <param name="body"></param>
         /// <param name="headers"></param>
-        public async void Publish(byte[] body, params (string name, string value)[] headers)
+        public async Task Publish(byte[] body, params (string name, string value)[] headers)
         {
-            var eventMessage = new ImmateriumMessage();// _serializer.CreateMessage(body);
-
-            eventMessage.Body = body;
+            var eventMessage = new ImmateriumMessage { Body = body };
 
             eventMessage.Headers.Type = ImmateriumMessageType.Event;
 
@@ -173,6 +171,13 @@ namespace Immaterium
             {
                 eventMessage.Headers.TryAdd(name, value);
             }
+
+            await PublishRaw(eventMessage);
+        }
+
+        public async Task PublishRaw(ImmateriumMessage eventMessage)
+        {
+            eventMessage.Headers.Type = ImmateriumMessageType.Event;
 
             await _transport.Publish(eventMessage);
         }
@@ -183,6 +188,7 @@ namespace Immaterium
         /// <param name="targetServiceName"></param>
         /// <param name="subscriber"></param>
         /// <param name="durable"></param>
+        [Obsolete]
         public void Subscribe(string targetServiceName, Subscriber subscriber, bool durable = true)
         {
             _transport.Subscribe(
