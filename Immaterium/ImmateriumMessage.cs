@@ -6,7 +6,7 @@
     public class ImmateriumMessage
     {
         /// <summary>
-        /// Get or set CorrelationId header
+        /// Get or set CorrelationId header. Used to match request and response
         /// </summary>
         public string CorrelationId
         {
@@ -15,7 +15,7 @@
         }
 
         /// <summary>
-        /// Get or set Type header
+        /// Get or set Type header. Default ImmateriumMessageType.Common
         /// </summary>
         public ImmateriumMessageType Type
         {
@@ -58,8 +58,11 @@
         /// <summary>
         /// Message payload
         /// </summary>
-        public virtual byte[] Body { get; set; }
+        public byte[] Body { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public ImmateriumMessage()
         {
             Body = null;

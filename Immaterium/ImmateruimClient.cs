@@ -144,7 +144,7 @@ namespace Immaterium
                 immateriumMessage.Headers.TryAdd(name, value);
             }
 
-            var response = await PostRaw(immateriumMessage);
+            var response = await Post(immateriumMessage);
             var result = response.Body;
 
             return result;
@@ -155,7 +155,7 @@ namespace Immaterium
         /// </summary>
         /// <param name="messageToSend"></param>
         /// <returns></returns>
-        public async Task<ImmateriumMessage> PostRaw(ImmateriumMessage messageToSend)
+        public async Task<ImmateriumMessage> Post(ImmateriumMessage messageToSend)
         {
             var t = await _transport.Post(messageToSend);
             return t;
@@ -177,10 +177,10 @@ namespace Immaterium
                 eventMessage.Headers.TryAdd(name, value);
             }
 
-            await PublishRaw(eventMessage);
+            await Publish(eventMessage);
         }
 
-        public async Task PublishRaw(ImmateriumMessage eventMessage)
+        public async Task Publish(ImmateriumMessage eventMessage)
         {
             eventMessage.Headers.Type = ImmateriumMessageType.Event;
 
