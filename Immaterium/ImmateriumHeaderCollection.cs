@@ -85,5 +85,33 @@ namespace Immaterium
                 Add(key, value);
             }
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="header"></param>
+        public bool TryAdd((string key, string value) header)
+        {
+            if (ContainsKey(header.key))
+                return false;
+
+            Add(header.key, header.value);
+            return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool TryAdd(string key, string value)
+        {
+            if (ContainsKey(key))
+                return false;
+
+            Add(key, value);
+            return true;
+        }
     }
 }
