@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31410.357
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Immaterium", "Immaterium\Immaterium.csproj", "{9D8B8DD2-12AB-4794-923E-F8C4A69C01F4}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Immaterium.Transports.Tests", "Immaterium.Transports.Tests\Immaterium.Transports.Tests.csproj", "{83BBD0D3-E92F-4C82-BCD1-3AECA047072A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{4DC2DCD9-2F14-4545-8003-E9D1408E5763}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Immaterium.Transports.Nats", "Immaterium.Transports.Nats\Immaterium.Transports.Nats.csproj", "{AF0D46D7-FF8C-481D-B50E-03DBBC74B88A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +31,10 @@ Global
 		{83BBD0D3-E92F-4C82-BCD1-3AECA047072A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83BBD0D3-E92F-4C82-BCD1-3AECA047072A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83BBD0D3-E92F-4C82-BCD1-3AECA047072A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF0D46D7-FF8C-481D-B50E-03DBBC74B88A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF0D46D7-FF8C-481D-B50E-03DBBC74B88A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF0D46D7-FF8C-481D-B50E-03DBBC74B88A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF0D46D7-FF8C-481D-B50E-03DBBC74B88A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -36,6 +42,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{198FFCD2-B728-4C88-B1CD-70F9B68C5F05} = {4DC2DCD9-2F14-4545-8003-E9D1408E5763}
 		{83BBD0D3-E92F-4C82-BCD1-3AECA047072A} = {4DC2DCD9-2F14-4545-8003-E9D1408E5763}
+		{AF0D46D7-FF8C-481D-B50E-03DBBC74B88A} = {4DC2DCD9-2F14-4545-8003-E9D1408E5763}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6A8C5701-E9BA-4B32-8700-7BE358AE80FF}
