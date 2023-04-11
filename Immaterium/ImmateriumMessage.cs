@@ -66,8 +66,8 @@
         public ImmateriumMessage()
         {
             Body = null;
-            Sender = "";
-            Receiver = "";
+            //Sender = "";
+            //Receiver = "";
             Type = ImmateriumMessageType.Common;
         }
 
@@ -89,8 +89,9 @@
             var response = new ImmateriumMessage
             {
                 CorrelationId = CorrelationId,
-                Receiver = ReplyTo,
+                Receiver = Sender,
                 Sender = Receiver,
+                ReplyTo = ReplyTo,
                 Type = ImmateriumMessageType.Response
             };
 

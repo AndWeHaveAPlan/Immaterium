@@ -65,7 +65,7 @@ namespace Immaterium
         /// 
         /// </summary>
         /// <param name="messageToSend"></param>
-        public void SendRaw(ImmateriumMessage messageToSend)
+        public void Send(ImmateriumMessage messageToSend)
         {
             _transport.Send(messageToSend);
         }
@@ -213,7 +213,7 @@ namespace Immaterium
         /// <param name="targetServiceName"></param>
         /// <param name="subscriber"></param>
         /// <param name="durable"></param>
-        public void SubscribeRaw(string targetServiceName, Subscriber<ImmateriumMessage> subscriber, bool durable = true)
+        public void Subscribe(string targetServiceName, Subscriber<ImmateriumMessage> subscriber, bool durable = true)
         {
             _transport.Subscribe(
                 targetServiceName,

@@ -113,5 +113,19 @@ namespace Immaterium
             Add(key, value);
             return true;
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public void Set(string key, string value)
+        {
+            if (ContainsKey(key))
+                this[key] = value;
+            else
+                Add(key, value);
+        }
     }
 }
