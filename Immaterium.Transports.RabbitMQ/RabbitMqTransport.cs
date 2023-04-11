@@ -293,17 +293,10 @@ namespace Immaterium.Transports.RabbitMQ
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="length"></param>
         /// <returns></returns>
-        private string CreateCorrelationId(int length = 8)
+        private string CreateCorrelationId()
         {
-            string str = "";
-            for (int i = 0; i < length; i++)
-            {
-                str += ((char)(Rng.Next(1, 26) + 64)).ToString();
-            }
-
-            return str;
+            return Rng.Next(10_000, 100_000).ToString();
         }
 
         /// <summary>
