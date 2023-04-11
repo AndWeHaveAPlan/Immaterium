@@ -1,19 +1,21 @@
 using System;
+using System.Threading;
 using System.Threading.Tasks;
-using Immaterium.Transports.RabbitMQ;
+using Immaterium.Transports.Nats;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RabbitMQ.Client;
+using NATS.Client;
 
-namespace Immaterium.Transports.Tests.RabbitMQ
+namespace Immaterium.Transports.Tests.Nats
 {
+    // TODO: abstract class
     [TestClass]
     public class SendTest
     {
-        private static RabbitMqTransport CreateTransport()
+        private static NatsTransport CreateTransport()
         {
-            var factory = new ConnectionFactory() { };
-            var connection = factory.CreateConnection();
-            return new RabbitMqTransport(connection) { UseCompression = true };
+            var factory = new ConnectionFactory();
+            var connection = factory.CreateConnection("nats://localhost:4222/");
+            return new NatsTransport(connection);
         }
 
         private static ImmateruimClient CreateClient(string serviceName)
@@ -22,7 +24,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
         }
 
         [TestMethod]
-        [Timeout(50000)]
+        [Timeout(5000)]
         public void Send()
         {
             var tcs = new TaskCompletionSource<bool>();
@@ -50,7 +52,8 @@ namespace Immaterium.Transports.Tests.RabbitMQ
             var server = CreateClient("crow1");
             var client = CreateClient("client1");
 
-            server.Listen(false);
+            server.Listen();
+            client.Listen();
 
             server.OnMessage += (sender, e) =>
             {
@@ -77,6 +80,7 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
             var server1 = CreateClient("crow2");
             var server2 = CreateClient("crow2");
+            var server3 = CreateClient("crow2");
 
             var client = CreateClient("client2");
 
@@ -84,36 +88,29 @@ namespace Immaterium.Transports.Tests.RabbitMQ
 
             object lockObj = new object();
 
-            server1.Listen(false);
-            server1.OnMessage += (sender, e) =>
+
+
+            void OnMessage(object sender, MessageReceivedEventArgs e)
             {
                 Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, e.Message.Body));
-                lock (lockObj)
-                {
-                    c++;
-                    if (c >= 10)
-                        tcs.SetResult(true);
-                }
-            };
+                Interlocked.Increment(ref c);
+            }
+
+            server1.Listen(false);
+            server1.OnMessage += OnMessage;
 
             server2.Listen(false);
-            server2.OnMessage += (sender, e) =>
-            {
-                Assert.IsTrue(ArrayHelper.ByteArrayEqual(ArrayHelper.TestArray1, e.Message.Body));
-                lock (lockObj)
-                {
-                    c++;
-                    if (c >= 10)
-                        tcs.SetResult(true);
-                }
-            };
+            server2.OnMessage += OnMessage;
+
+            server3.Listen(false);
+            server3.OnMessage += OnMessage;
 
             for (int i = 0; i < 10; i++)
             {
                 client.Send("crow2", ArrayHelper.TestArray1);
             }
 
-            tcs.Task.Wait();
+            Task.Delay(TimeSpan.FromSeconds(2)).Wait();
             Assert.AreEqual(10, c);
         }
 

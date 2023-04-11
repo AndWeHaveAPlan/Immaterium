@@ -66,8 +66,6 @@
         public ImmateriumMessage()
         {
             Body = null;
-            //Sender = "";
-            //Receiver = "";
             Type = ImmateriumMessageType.Common;
         }
 

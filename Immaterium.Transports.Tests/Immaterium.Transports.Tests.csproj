@@ -15,6 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Immaterium.Transports.Nats\Immaterium.Transports.Nats.csproj" />
     <ProjectReference Include="..\Immaterium.Transports.RabbitMQ\Immaterium.Transports.RabbitMQ.csproj" />
   </ItemGroup>
 
